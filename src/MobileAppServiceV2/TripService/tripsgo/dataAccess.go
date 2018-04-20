@@ -5,15 +5,23 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"os"
 )
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
 
 var (
 	debug    = flag.Bool("debug", false, "enable debugging")
-	password = flag.String("password", "CHANGE ME", "the database password")
+	password = flag.String("password", getEnv("SQL_PASSWORD", "changeme"), "the database password")
 	port     = flag.Int("port", 1433, "the database port")
-	server   = flag.String("server", "mydrivingdbserver.database.windows.net", "the database server")
-	user     = flag.String("user", "YourUserName", "the database user")
-	database = flag.String("d", "myDrivingDB", "db_name")
+	server   = flag.String("server", getEnv("SQL_SERVER", "changeme.database.windows.net"), "the database server")
+	user     = flag.String("user", getEnv("SQL_USER", "YourUserName"), "the database user")
+	database = flag.String("d", getEnv("SQL_DBNAME", "mydrivingDB"), "db_name")
 )
 
 func ExecuteNonQuery(query string) (string, error) {

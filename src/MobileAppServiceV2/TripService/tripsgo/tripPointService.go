@@ -41,12 +41,10 @@ func getTripPoints(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(serializedReturn))
 }
 
-
-func GetTripPoint(w http.ResponseWriter, r *http.Request) {
+func getTripPointByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	tripPointId := params["id"]
-
 
 	query := "SELECT [Id], [TripId], [Latitude], [Longitude], [Speed], [RecordedTimeStamp], [Sequence], [RPM], [ShortTermFuelBank], [LongTermFuelBank], [ThrottlePosition], [RelativeThrottlePosition], [Runtime], [DistanceWithMalfunctionLight], [EngineLoad], [EngineFuelRate], [VIN] FROM TripPoints WHERE Id = '" + tripPointId + "' AND Deleted = 0"
 
