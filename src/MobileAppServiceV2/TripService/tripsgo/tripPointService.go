@@ -1,40 +1,18 @@
-package openHackDevOps
+package tripsgo
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
-)
 
-type TripPoint struct {
-	Id                           string
-	TripId                       string
-	Latitude                     float64
-	Longitude                    float64
-	Speed                        float64
-	RecordedTimeStamp            string
-	Sequence                     int
-	RPM                          float64
-	ShortTermFuelBank            float64
-	LongTermFuelBank             float64
-	ThrottlePosition             float64
-	RelativeThrottlePosition     float64
-	Runtime                      float64
-	DistanceWithMalfunctionLight float64
-	EngineLoad                   float64
-	MassFlowRate                 float64
-	EngineFuelRate               float64
-	VIN                          sql.NullString
-	HasOBDData                   bool
-	HasSimulatedOBDData          bool
-}
+	"github.com/gorilla/mux"
+)
 
 // TripPoint Service Methods
 
-func GetAllTripPoints(w http.ResponseWriter, r *http.Request) {
+func getTripPoints(w http.ResponseWriter, r *http.Request) {
 	query := "SELECT [Id], [TripId], [Latitude], [Longitude], [Speed], [RecordedTimeStamp], [Sequence], [RPM], [ShortTermFuelBank], [LongTermFuelBank], [ThrottlePosition], [RelativeThrottlePosition], [Runtime], [DistanceWithMalfunctionLight], [EngineLoad], [EngineFuelRate], [VIN] FROM [dbo].[TripPoints] WHERE Deleted = 0"
 
 	statement, err := ExecuteQuery(query)
@@ -63,8 +41,12 @@ func GetAllTripPoints(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(serializedReturn))
 }
 
+
 func GetTripPoint(w http.ResponseWriter, r *http.Request) {
-	tripPointId := r.FormValue("id")
+	params := mux.Vars(r)
+
+	tripPointId := params["id"]
+
 
 	query := "SELECT [Id], [TripId], [Latitude], [Longitude], [Speed], [RecordedTimeStamp], [Sequence], [RPM], [ShortTermFuelBank], [LongTermFuelBank], [ThrottlePosition], [RelativeThrottlePosition], [Runtime], [DistanceWithMalfunctionLight], [EngineLoad], [EngineFuelRate], [VIN] FROM TripPoints WHERE Id = '" + tripPointId + "' AND Deleted = 0"
 
@@ -89,7 +71,7 @@ func GetTripPoint(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(serializedTripPoint))
 }
 
-func PostTripPoint(w http.ResponseWriter, r *http.Request) {
+func createTripPoint(w http.ResponseWriter, r *http.Request) {
 	tripId := r.FormValue("tripId")
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -107,24 +89,24 @@ func PostTripPoint(w http.ResponseWriter, r *http.Request) {
 
 	insertQuery := fmt.Sprintf("DECLARE @tempReturn TABLE (TripPointId NVARCHAR(128)); INSERT INTO TripPoints ([TripId], [Latitude], [Longitude], [Speed], [RecordedTimeStamp], [Sequence], [RPM], [ShortTermFuelBank], [LongTermFuelBank], [ThrottlePosition], [RelativeThrottlePosition], [Runtime], [DistanceWithMalfunctionLight], [EngineLoad], [EngineFuelRate], [MassFlowRate], [HasOBDData], [HasSimulatedOBDData], [VIN], [Deleted]) OUTPUT Inserted.ID INTO @tempReturn VALUES ('%s', '%s', '%s', '%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', 'false'); SELECT TripPointId FROM @tempReturn",
 		tripPoint.TripId,
-		strconv.FormatFloat(tripPoint.Latitude, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.Longitude, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.Speed, 'f', -1, 64),
+		tripPoint.Latitude,
+		tripPoint.Longitude,
+		tripPoint.Speed,
 		tripPoint.RecordedTimeStamp,
 		tripPoint.Sequence,
-		strconv.FormatFloat(tripPoint.RPM, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.ShortTermFuelBank, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.LongTermFuelBank, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.ThrottlePosition, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.RelativeThrottlePosition, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.Runtime, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.DistanceWithMalfunctionLight, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.EngineLoad, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.MassFlowRate, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.EngineFuelRate, 'f', -1, 64),
+		tripPoint.RPM,
+		tripPoint.ShortTermFuelBank,
+		tripPoint.LongTermFuelBank,
+		tripPoint.ThrottlePosition,
+		tripPoint.RelativeThrottlePosition,
+		tripPoint.Runtime,
+		tripPoint.DistanceWithMalfunctionLight,
+		tripPoint.EngineLoad,
+		tripPoint.MassFlowRate,
+		tripPoint.EngineFuelRate,
 		strconv.FormatBool(tripPoint.HasOBDData),
 		strconv.FormatBool(tripPoint.HasSimulatedOBDData),
-		tripPoint.VIN.String)
+		tripPoint.VIN)
 
 	fmt.Fprintf(w, insertQuery)
 
@@ -150,7 +132,7 @@ func PostTripPoint(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprintf(w, string(serializedTripPoint))
 }
 
-func PatchTripPoint(w http.ResponseWriter, r *http.Request) {
+func updateTripPoint(w http.ResponseWriter, r *http.Request) {
 	tripPointId := r.FormValue("id")
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -173,24 +155,25 @@ func PatchTripPoint(w http.ResponseWriter, r *http.Request) {
 
 	updateQuery := fmt.Sprintf("UPDATE [TripPoints] SET [TripId] = '%s',[Latitude] = '%s',[Longitude] = '%s',[Speed] = '%s',[RecordedTimeStamp] = '%s',[Sequence] = %d,[RPM] = '%s',[ShortTermFuelBank] = '%s',[LongTermFuelBank] = '%s',[ThrottlePosition] = '%s',[RelativeThrottlePosition] = '%s',[Runtime] = '%s',[DistanceWithMalfunctionLight] = '%s',[EngineLoad] = '%s',[MassFlowRate] = '%s',[EngineFuelRate] = '%s',[HasOBDData] = '%s',[HasSimulatedOBDData] = '%s',[VIN] = '%s' WHERE Id = '%s'",
 		tripPoint.TripId,
-		strconv.FormatFloat(tripPoint.Latitude, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.Longitude, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.Speed, 'f', -1, 64),
+		tripPoint.TripId,
+		tripPoint.Latitude,
+		tripPoint.Longitude,
+		tripPoint.Speed,
 		tripPoint.RecordedTimeStamp,
 		tripPoint.Sequence,
-		strconv.FormatFloat(tripPoint.RPM, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.ShortTermFuelBank, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.LongTermFuelBank, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.ThrottlePosition, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.RelativeThrottlePosition, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.Runtime, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.DistanceWithMalfunctionLight, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.EngineLoad, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.MassFlowRate, 'f', -1, 64),
-		strconv.FormatFloat(tripPoint.EngineFuelRate, 'f', -1, 64),
+		tripPoint.RPM,
+		tripPoint.ShortTermFuelBank,
+		tripPoint.LongTermFuelBank,
+		tripPoint.ThrottlePosition,
+		tripPoint.RelativeThrottlePosition,
+		tripPoint.Runtime,
+		tripPoint.DistanceWithMalfunctionLight,
+		tripPoint.EngineLoad,
+		tripPoint.MassFlowRate,
+		tripPoint.EngineFuelRate,
 		strconv.FormatBool(tripPoint.HasOBDData),
 		strconv.FormatBool(tripPoint.HasSimulatedOBDData),
-		tripPoint.VIN.String,
+		tripPoint.VIN,
 		tripPointId)
 
 	result, err := ExecuteNonQuery(updateQuery)
@@ -203,7 +186,7 @@ func PatchTripPoint(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(result))
 }
 
-func DeleteTripPoint(w http.ResponseWriter, r *http.Request) {
+func deleteTripPoint(w http.ResponseWriter, r *http.Request) {
 	tripPointId := r.FormValue("id")
 
 	deleteTripPointQuery := fmt.Sprintf("UPDATE TripPoints SET Deleted = 1 WHERE Id = '%s'", tripPointId)
@@ -220,7 +203,7 @@ func DeleteTripPoint(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(serializedResult))
 }
 
-func GetMaxSequence(w http.ResponseWriter, r *http.Request) {
+func getMaxSequence(w http.ResponseWriter, r *http.Request) {
 	tripId := r.FormValue("id")
 
 	query := fmt.Sprintf("SELECT MAX(Sequence) as MaxSequence FROM TripPoints where tripid = '%s'", tripId)
@@ -246,6 +229,6 @@ func GetMaxSequence(w http.ResponseWriter, r *http.Request) {
 
 // End of Trip Point Service Methods
 
-type NewTripPoint struct {
+type newTripPoint struct {
 	Id string
 }

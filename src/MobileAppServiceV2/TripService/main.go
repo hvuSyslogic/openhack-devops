@@ -4,7 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	sw "./go"
+	//sw "gopkg.in/Azure-Samples/openhack-devops/src/MobileAppServiceV2/TripService/tripsgo.v1.0.0"
+	sw "github.com/Azure-Samples/openhack-devops/src/MobileAppServiceV2/TripService/tripsgo"
 )
 
 func main() {

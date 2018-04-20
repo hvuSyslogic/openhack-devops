@@ -1,4 +1,4 @@
-package openHackDevOps
+package tripsgo
 
 import (
 	"database/sql"
