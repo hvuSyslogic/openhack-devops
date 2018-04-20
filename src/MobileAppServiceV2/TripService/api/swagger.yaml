@@ -69,6 +69,29 @@ paths:
           description: "Unknown Error"
           schema:
             $ref: "#/definitions/error_response_default"
+  /trips/user/{userID}:
+    x-swagger-router-controller: trips
+    get:
+      description: "Returns all trips for a given user"
+      operationId: "getAllTripsForUser"
+      responses:
+        200:
+          description: "Trips found"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/trip"
+        default:
+          description: "Unknown Error"
+          schema:
+            $ref: "#/definitions/error_response_default"
+      parameters:
+        -
+          name: "userID"
+          in: "path"
+          description: "User ID"
+          type: "string"
+          required: true
   /trips/{tripID}:
     x-swagger-router-controller: trips
     get:

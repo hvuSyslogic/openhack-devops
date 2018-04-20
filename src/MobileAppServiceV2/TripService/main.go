@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	log.Printf("Server started on port 8080")
+
+	log.Printf("Trips Service Server started on port 8080")
 
 	router := sw.NewRouter()
 

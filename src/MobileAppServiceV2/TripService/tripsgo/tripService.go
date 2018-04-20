@@ -17,10 +17,10 @@ import (
 func getTripByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	tripId := params["id"]
+	//Build Query
+	var query = SelectTripByIdQuery(params["id"])
 
-	query := "SELECT Id, Name, UserId, RecordedTimeStamp, EndTimeStamp, Rating, IsComplete, HasSimulatedOBDData, AverageSpeed, FuelUsed, HardStops, HardAccelerations, Distance FROM Trips WHERE Id = '" + tripId + "' AND Deleted = 0"
-
+	//Execute Query
 	row, err := FirstOrDefault(query)
 
 	if err != nil {
@@ -43,9 +43,39 @@ func getTripByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllTrips(w http.ResponseWriter, r *http.Request) {
-	userId := r.FormValue("Id")
 
-	query := "SELECT Id, Name, UserId, RecordedTimeStamp, EndTimeStamp, Rating, IsComplete, HasSimulatedOBDData, AverageSpeed, FuelUsed, HardStops, HardAccelerations, Distance FROM Trips WHERE UserId LIKE '%" + userId + "' and Deleted = 0"
+	var query = SelectAllTrips()
+
+	statement, err := ExecuteQuery(query)
+
+	if err != nil {
+		fmt.Fprintf(w, SerializeError(err, "Error while retrieving trips from database"))
+		return
+	}
+
+	got := []Trip{}
+
+	for statement.Next() {
+		var r Trip
+		err := statement.Scan(&r.Id, &r.Name, &r.UserId, &r.RecordedTimeStamp, &r.EndTimeStamp, &r.Rating, &r.IsComplete, &r.HasSimulatedOBDData, &r.AverageSpeed, &r.FuelUsed, &r.HardStops, &r.HardAccelerations, &r.Distance)
+
+		if err != nil {
+			fmt.Fprintf(w, SerializeError(err, "Error scanning Trips"))
+			return
+		}
+
+		got = append(got, r)
+	}
+
+	serializedReturn, _ := json.Marshal(got)
+
+	fmt.Fprintf(w, string(serializedReturn))
+}
+
+func getAllTripsForUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	var query = SelectAllTripsForUser(params["id"])
 
 	statement, err := ExecuteQuery(query)
 

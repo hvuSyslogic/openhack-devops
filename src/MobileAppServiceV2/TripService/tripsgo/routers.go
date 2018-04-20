@@ -35,7 +35,7 @@ func NewRouter() *mux.Router {
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
+	fmt.Fprintf(w, "Trips Service")
 }
 
 var routes = Routes{
@@ -79,6 +79,13 @@ var routes = Routes{
 		strings.ToUpper("Get"),
 		"/api/trips",
 		getAllTrips,
+	},
+
+	Route{
+		"GetAllTripsForUser",
+		strings.ToUpper("Get"),
+		"/api/trips/user/{userID}",
+		getAllTripsForUser,
 	},
 
 	Route{
