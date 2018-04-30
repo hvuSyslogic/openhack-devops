@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	_ "github.com/denisenkom/go-mssqldb"
+	_ "github.com/denisenkom/go-mssqldb" //vscode deletes this import if it is not a blank import
 	"github.com/gorilla/mux"
 )
 
@@ -24,13 +24,26 @@ func getTripByID(w http.ResponseWriter, r *http.Request) {
 	row, err := FirstOrDefault(query)
 
 	if err != nil {
-		fmt.Fprintf(w, SerializeError(err, "Error while retrieving trip from database"))
+		fmt.Fprintf(w, SerializeError(err, "getTripsByID - Error while retrieving trip from database"))
 		return
 	}
 
 	var trip Trip
 
-	err = row.Scan(&trip.Id, &trip.Name, &trip.UserId, &trip.RecordedTimeStamp, &trip.EndTimeStamp, &trip.Rating, &trip.IsComplete, &trip.HasSimulatedOBDData, &trip.AverageSpeed, &trip.FuelUsed, &trip.HardStops, &trip.HardAccelerations, &trip.Distance)
+	err = row.Scan(
+		&trip.Id,
+		&trip.Name,
+		&trip.UserId,
+		&trip.RecordedTimeStamp,
+		&trip.EndTimeStamp,
+		&trip.Rating,
+		&trip.IsComplete,
+		&trip.HasSimulatedOBDData,
+		&trip.AverageSpeed,
+		&trip.FuelUsed,
+		&trip.HardStops,
+		&trip.HardAccelerations,
+		&trip.Distance)
 
 	if err != nil {
 		fmt.Fprintf(w, SerializeError(err, "Failed to scan a trip"))
@@ -44,73 +57,95 @@ func getTripByID(w http.ResponseWriter, r *http.Request) {
 
 func getAllTrips(w http.ResponseWriter, r *http.Request) {
 
-	var query = SelectAllTrips()
+	var query = SelectAllTripsQuery()
 
-	statement, err := ExecuteQuery(query)
+	tripRows, err := ExecuteQuery(query)
 
 	if err != nil {
-		fmt.Fprintf(w, SerializeError(err, "Error while retrieving trips from database"))
+		fmt.Fprintf(w, SerializeError(err, "getAllTrips - Query Failed to Execute."))
 		return
 	}
 
-	got := []Trip{}
+	trips := []Trip{}
 
-	for statement.Next() {
+	for tripRows.Next() {
 		var r Trip
-		err := statement.Scan(&r.Id, &r.Name, &r.UserId, &r.RecordedTimeStamp, &r.EndTimeStamp, &r.Rating, &r.IsComplete, &r.HasSimulatedOBDData, &r.AverageSpeed, &r.FuelUsed, &r.HardStops, &r.HardAccelerations, &r.Distance)
+		err := tripRows.Scan(
+			&r.Id,
+			&r.Name,
+			&r.UserId,
+			&r.RecordedTimeStamp,
+			&r.EndTimeStamp,
+			&r.Rating,
+			&r.IsComplete,
+			&r.HasSimulatedOBDData,
+			&r.AverageSpeed,
+			&r.FuelUsed,
+			&r.HardStops,
+			&r.HardAccelerations,
+			&r.Distance)
 
 		if err != nil {
-			fmt.Fprintf(w, SerializeError(err, "Error scanning Trips"))
+			fmt.Fprintf(w, SerializeError(err, "GetAllTrips - Error scanning Trips"))
 			return
 		}
 
-		got = append(got, r)
+		trips = append(trips, r)
 	}
 
-	serializedReturn, _ := json.Marshal(got)
+	tripsJSON, _ := json.Marshal(trips)
 
-	fmt.Fprintf(w, string(serializedReturn))
+	fmt.Fprintf(w, string(tripsJSON))
 }
 
 func getAllTripsForUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	var query = SelectAllTripsForUser(params["id"])
+	var query = SelectAllTripsForUserQuery(params["id"])
 
-	statement, err := ExecuteQuery(query)
+	tripRows, err := ExecuteQuery(query)
 
 	if err != nil {
-		fmt.Fprintf(w, SerializeError(err, "Error while retrieving trips from database"))
+		fmt.Fprintf(w, SerializeError(err, "getAllTripsForUser - Error while retrieving trips from database"))
 		return
 	}
 
-	got := []Trip{}
+	trips := []Trip{}
 
-	for statement.Next() {
+	for tripRows.Next() {
 		var r Trip
-		err := statement.Scan(&r.Id, &r.Name, &r.UserId, &r.RecordedTimeStamp, &r.EndTimeStamp, &r.Rating, &r.IsComplete, &r.HasSimulatedOBDData, &r.AverageSpeed, &r.FuelUsed, &r.HardStops, &r.HardAccelerations, &r.Distance)
+		err := tripRows.Scan(&r.Id,
+			&r.Name,
+			&r.UserId,
+			&r.RecordedTimeStamp,
+			&r.EndTimeStamp,
+			&r.Rating,
+			&r.IsComplete,
+			&r.HasSimulatedOBDData,
+			&r.AverageSpeed,
+			&r.FuelUsed,
+			&r.HardStops,
+			&r.HardAccelerations,
+			&r.Distance)
 
 		if err != nil {
-			fmt.Fprintf(w, SerializeError(err, "Error scanning Trips"))
+			fmt.Fprintf(w, SerializeError(err, "getAllTripsForUser - Error scanning Trips"))
 			return
 		}
 
-		got = append(got, r)
+		trips = append(trips, r)
 	}
 
-	serializedReturn, _ := json.Marshal(got)
+	tripsJSON, _ := json.Marshal(trips)
 
-	fmt.Fprintf(w, string(serializedReturn))
+	fmt.Fprintf(w, string(tripsJSON))
 }
 
 func deleteTrip(w http.ResponseWriter, r *http.Request) {
-	tripId := r.FormValue("id")
+	params := mux.Vars(r)
 
-	deleteTripPointsQuery := fmt.Sprintf("UPDATE TripPoints SET Deleted = 1 WHERE TripId = '%s'", tripId)
-	deleteTripsQuery := fmt.Sprintf("UPDAte Trips SET Deleted = 1 WHERE Id = '%s'", tripId)
-
-	log.Println(deleteTripPointsQuery)
-	log.Println(deleteTripsQuery)
+	var deleteTripPointsQuery = DeleteTripPointsForTripQuery(params["id"])
+	var deleteTripsQuery = DeleteTripQuery(params["id"])
 
 	result, err := ExecuteNonQuery(deleteTripPointsQuery)
 
@@ -119,6 +154,8 @@ func deleteTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println(fmt.Sprintln("Deleted trip points for Trip '%s'", params["id"]))
+
 	result, err = ExecuteNonQuery(deleteTripsQuery)
 
 	if err != nil {
@@ -126,13 +163,15 @@ func deleteTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println(fmt.Sprintln("Deleted trip '%s'", params["id"]))
+
 	serializedResult, _ := json.Marshal(result)
 
 	fmt.Fprintf(w, string(serializedResult))
 }
 
 func updateTrip(w http.ResponseWriter, r *http.Request) {
-	tripId := r.FormValue("id")
+	tripID := r.FormValue("id")
 	body, err := ioutil.ReadAll(r.Body)
 
 	defer r.Body.Close()
@@ -151,7 +190,7 @@ func updateTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updateQuery := fmt.Sprintf("UPDATE Trips SET Name = '%s', UserId = '%s', RecordedTimeStamp = '%s', EndTimeStamp = '%s', Rating = %d, IsComplete = '%s', HasSimulatedOBDData = '%s', AverageSpeed = %f, FuelUsed = %s, HardStops = %s, HardAccelerations = %s, MainPhotoUrl = '%s', Distance = %f, UpdatedAt = GETDATE() WHERE Id = '%s'", trip.Name, trip.UserId, trip.RecordedTimeStamp, trip.EndTimeStamp, trip.Rating, strconv.FormatBool(trip.IsComplete), strconv.FormatBool(trip.HasSimulatedOBDData), trip.AverageSpeed, trip.FuelUsed, trip.HardStops, trip.HardAccelerations, trip.Distance, tripId)
+	updateQuery := fmt.Sprintf("UPDATE Trips SET Name = '%s', UserId = '%s', RecordedTimeStamp = '%s', EndTimeStamp = '%s', Rating = %d, IsComplete = '%s', HasSimulatedOBDData = '%s', AverageSpeed = %f, FuelUsed = %s, HardStops = %s, HardAccelerations = %s, MainPhotoUrl = '%s', Distance = %f, UpdatedAt = GETDATE() WHERE Id = '%s'", trip.Name, trip.UserId, trip.RecordedTimeStamp, trip.EndTimeStamp, trip.Rating, strconv.FormatBool(trip.IsComplete), strconv.FormatBool(trip.HasSimulatedOBDData), trip.AverageSpeed, trip.FuelUsed, trip.HardStops, trip.HardAccelerations, trip.Distance, tripID)
 
 	result, err := ExecuteNonQuery(updateQuery)
 

@@ -1,5 +1,7 @@
 package tripsgo
 
+import "fmt"
+
 func SelectTripByIdQuery(tripID string) string {
 	return `SELECT
 		Id,
@@ -20,7 +22,7 @@ func SelectTripByIdQuery(tripID string) string {
 		AND Deleted = 0`
 }
 
-func SelectAllTrips() string {
+func SelectAllTripsQuery() string {
 	return `SELECT
 	Id,
 	Name,
@@ -39,7 +41,7 @@ func SelectAllTrips() string {
 	WHERE Deleted = 0`
 }
 
-func SelectAllTripsForUser(userID string) string {
+func SelectAllTripsForUserQuery(userID string) string {
 	return `SELECT
 	Id,
 	Name,
@@ -57,4 +59,12 @@ func SelectAllTripsForUser(userID string) string {
 	FROM Trips
 	WHERE UserId LIKE '%` + userID + `'
 	AND Deleted = 0`
+}
+
+func DeleteTripPointsForTripQuery(tripID string) string {
+	return fmt.Sprintf("UPDATE TripPoints SET Deleted = 1 WHERE TripId = '%s'", tripID)
+}
+
+func DeleteTripQuery(tripID string) string {
+	return fmt.Sprintf("UPDAte Trips SET Deleted = 1 WHERE Id = '%s'", tripID)
 }

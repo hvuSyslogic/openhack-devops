@@ -24,6 +24,7 @@ var (
 	database = flag.String("d", getEnv("SQL_DBNAME", "mydrivingDB"), "db_name")
 )
 
+// Execute a SQL query that has no records returned (Ex. Delete)
 func ExecuteNonQuery(query string) (string, error) {
 	connString := fmt.Sprintf("server=%s;database=%s;user id=%s;password=%s;port=%d", *server, *database, *user, *password, *port)
 
