@@ -62,7 +62,7 @@ Write-Output "******************************************************************
 Write-Output "* Deploying the resources in the ARM template. This operation may take several minutes..."
 Write-Output "**************************************************************************************************"
 
-$deployment2 = New-AzureRmResourceGroupDeployment -Name "$DeploymentName-1" -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFile -TemplateParameterFile $ParametersFile -Mode Complete -Force -Verbose
+$deployment2 = New-AzureRmResourceGroupDeployment -Name "$DeploymentName-1" -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFile -TemplateParameterFile $ParametersFile -Force -Verbose
 
 if ($deployment2.ProvisioningState -ne "Succeeded") {
 	Write-Warning "Skipping the storage and database initialization..."
@@ -114,7 +114,8 @@ Write-Output "Initializing the '$databaseName' database..."
 Write-Output ""
 
 # Set variables that will be passed to VSTS
-$owner = (Get-AzureRmContext).Account.Id
+$owner = 'oguzp@microsoft.com'
+#$owner = (Get-AzureRmContext).Account.Id
 $mlStorageAccountName = $deployment1.Outputs.mlStorageAccountName.Value
 $mlStorageAccountKey = $deployment1.Outputs.mlStorageAccountKey.Value
 $sqlServerFullyQualifiedDomainName = $deployment2.Outputs.sqlServerFullyQualifiedDomainName.Value
@@ -135,6 +136,4 @@ Write-Host "##vso[task.setvariable variable=sqlDBName]$sqlDBName"
 Write-Host "##vso[task.setvariable variable=sqlAnalyticsFullyQualifiedDomainName]$sqlAnalyticsFullyQualifiedDomainName"
 Write-Host "##vso[task.setvariable variable=sqlAnalyticsServerAdminLogin]$sqlAnalyticsServerAdminLogin"
 Write-Host "##vso[task.setvariable variable=sqlAnalyticsDBName]$sqlAnalyticsDBName"
-
-
 
