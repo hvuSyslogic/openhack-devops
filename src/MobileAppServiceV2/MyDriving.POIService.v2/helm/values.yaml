@@ -2,27 +2,27 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
-
-image:
-  repository: odaibacr123.azurecr.io/team01
+replicaCount: 2
+repository:
+  image: acrreplace.azurecr.io/devopsoh/imagereplace
   tag: latest
   pullPolicy: Always
-  pullSecrets: azureacr
-
+image:
+  name: mydrive-poi
+  label: mydrive-poi
+  containerPort: 8080
 service:
-  name: pois-svc
-  type: ClusterIP
-  internalPort: 8080
-  externalPort: 8080
-
+  externalPort: 80
 ingress:
   enabled: true
   annotations:
     kubernetes.io/ingress.class: traefik
-  path: /api/GetAllPOIs
-  hosts:
-    - mydriving-admin.julien.work
+  rules:
+    akstraefikrg9aa1.eastus.cloudapp.azure.com:
+      - path: /api/GetAllPOIs
+        serviceName: api-poi-mydrive-poi
+        servicePort: 80
+
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

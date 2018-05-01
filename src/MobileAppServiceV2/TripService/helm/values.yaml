@@ -3,12 +3,12 @@
 # Declare variables to be passed into your templates.
 replicaCount: 2
 repository:
-  image: acrreplace/devopsoh/imagetagreplace
+  image: acrreplace.azurecr.io/devopsoh/imagereplace
   tag: latest
   pullPolicy: Always
 image:
-  name: mydrive-poi
-  label: mydrive-poi
+  name: mydrive-trips
+  label: mydrive-trips
   containerPort: 8080
 service:
   externalPort: 80
@@ -18,8 +18,11 @@ ingress:
     kubernetes.io/ingress.class: traefik
   rules:
     dnsurlreplace:
-      - path: /api/GetAllPOIs
-        serviceName: api-poi-mydrive-poi
+      - path: /api/trips/*
+        serviceName: api-trips-mydrive-trips
+        servicePort: 80
+      - path: /healthcheck
+        serviceName: api-trips-mydrive-trips
         servicePort: 80
 resources: {}
  # We usually recommend not to specify default resources and to leave this as a conscious

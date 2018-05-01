@@ -1,4 +1,4 @@
-# My Driving User API
+# My Driving Trips API
 
 ## Description
 
