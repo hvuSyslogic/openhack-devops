@@ -37,7 +37,7 @@ namespace MyDriving.UWP.Views
             Locations = new List<BasicGeoposition>();
             DataContext = this;
 
-            if (Logger.BingMapsAPIKey != "____BingMapsAPIKey____")
+            if (Logger.BingMapsAPIKey != "Ar6iuHZYgX1BrfJs6SRJaXWbpU_HKdoe7G-OO9b2kl3rWvcawYx235GGx5FPM76O")
             {
                 MyMap.MapServiceToken = Logger.BingMapsAPIKey;
             }

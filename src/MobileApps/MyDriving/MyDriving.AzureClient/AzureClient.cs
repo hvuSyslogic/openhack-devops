@@ -7,12 +7,15 @@ using System.Threading.Tasks;
 using MyDriving.Utils;
 using Newtonsoft.Json.Linq;
 using System;
+using PCLAppConfig;
 
 namespace MyDriving.AzureClient
 {
     public class AzureClient : IAzureClient
     {
-        const string DefaultMobileServiceUrl = "https://mydriving-vpwupcazgfita.azurewebsites.net";
+        //ConfigurationManager config = new ConfigurationManager(PCLAppConfig.FileSystemStream.PortableStream.Current);
+        //ConfigurationManager.Initialise(PCLAppConfig.FileSystemStream.PortableStream.Current);
+        const string DefaultMobileServiceUrl = "https://mydriving-or76fh5yqpqg2.azurewebsites.net";
         static IMobileServiceClient client;
 
         public IMobileServiceClient Client => client ?? (client = CreateClient());
