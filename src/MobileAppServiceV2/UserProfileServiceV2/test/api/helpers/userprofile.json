@@ -1,0 +1,20 @@
+{
+    "Id": "TEST112345",
+    "FirstName": "Richard",
+    "LastName": "Guthrie",
+    "UserId": "67890",
+    "ProfilePictureUri": "http:\/\/whoknows.com",
+    "Rating": 1,
+    "Ranking": 1,
+    "TotalDistance": 1.160000000000000e+002,
+    "TotalTrips": 5,
+    "TotalTime": 26,
+    "HardStops": 0,
+    "HardAccelerations": 0,
+    "FuelConsumption": 2.400000000000000e+000,
+    "MaxSpeed": 7.000000000000000e+001,
+    "Version": "AAAAAAAAB9o=",
+    "CreatedAt": "2018-04-16T17:33:40.9366667Z",
+    "UpdatedAt": "2018-04-16T17:33:40.9541356Z",
+    "Deleted": false
+}

@@ -1,0 +1,30 @@
+{
+  "name": "my-driving-user-profile-api",
+  "version": "0.1.0",
+  "description": "API for the user profile in the My Driving example app. https://github.com/Azure-Samples/openhack-devops",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Azure-Samples/openhack-devops.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "~1.18.2",
+    "express": "^4.12.3",
+    "express4-tedious": "^0.3.0",
+    "swagger-express-mw": "^0.1.0",
+    "swagger-tools": "0.10.3",
+    "tedious": "^2.3.1"
+  },
+  "devDependencies": {
+    "mocha": "^5.1.1",
+    "should": "^7.1.0",
+    "supertest": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "test": "node test"
+  }
+}

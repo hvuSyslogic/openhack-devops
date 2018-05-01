@@ -1,0 +1,41 @@
+swagger: '2.0'
+info:
+  version: 0.0.1
+  title: "MyDriving User Profile API"
+host: 'localhost:8080'
+basePath: /api/
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /bad:
+    x-swagger-router-controller: healthcheck
+    get:
+      description: "Returns healthcheck for systems looking to ensure API is up and operational"
+      responses:
+        200:
+          description: "Service is healthy"
+          schema:
+            $ref: "#/definitions/Healthcheck"
+        default:
+          description: "An error occurred"
+          schema:
+            $ref: "#/definitions/Healthcheck"
+      tags:
+        - healthcheck
+  /swagger:
+    x-swagger-pipe: swagger_raw
+definitions:
+  Healthcheck:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        description: ""
+      status:
+        type: "string"
+        description: ""
