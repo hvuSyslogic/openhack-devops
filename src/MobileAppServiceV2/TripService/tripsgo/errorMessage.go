@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// SerializeError - Serialize Error information to JSON format.
 func SerializeError(e error, customMessage string) string {
 	var errorMessage struct {
 		Message string

@@ -1,5 +1,6 @@
 package tripsgo
 
+// ErrorResponseDefault - Structure to return error information to service caller.
 type ErrorResponseDefault struct {
 
 	// Error code (if available)

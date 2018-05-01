@@ -4,15 +4,16 @@ import (
 	"time"
 )
 
+// Trip - Represents a single trip by a user with its associated set of trip points.
 type Trip struct {
 
-	// Trip Id
-	Id string `json:"Id,omitempty"`
+	// Trip ID
+	ID string `json:"Id,omitempty"`
 
 	Name string `json:"Name,omitempty"`
 
 	// User's unique identity
-	UserId string `json:"UserId,omitempty"`
+	UserID string `json:"UserId,omitempty"`
 
 	RecordedTimeStamp string `json:"RecordedTimeStamp,omitempty"`
 

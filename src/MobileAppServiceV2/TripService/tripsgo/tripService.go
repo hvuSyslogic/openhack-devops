@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/denisenkom/go-mssqldb" //vscode deletes this import if it is not a blank import
 	"github.com/gorilla/mux"
@@ -14,11 +13,12 @@ import (
 
 // Trip Service Methods
 
+// getTripByID - gets a trip by its trip id
 func getTripByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	//Build Query
-	var query = SelectTripByIdQuery(params["id"])
+	var query = SelectTripByIDQuery(params["id"])
 
 	//Execute Query
 	row, err := FirstOrDefault(query)
@@ -31,9 +31,9 @@ func getTripByID(w http.ResponseWriter, r *http.Request) {
 	var trip Trip
 
 	err = row.Scan(
-		&trip.Id,
+		&trip.ID,
 		&trip.Name,
-		&trip.UserId,
+		&trip.UserID,
 		&trip.RecordedTimeStamp,
 		&trip.EndTimeStamp,
 		&trip.Rating,
@@ -55,6 +55,7 @@ func getTripByID(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(serializedTrip))
 }
 
+// getAllTrips - get all trips
 func getAllTrips(w http.ResponseWriter, r *http.Request) {
 
 	var query = SelectAllTripsQuery()
@@ -71,9 +72,9 @@ func getAllTrips(w http.ResponseWriter, r *http.Request) {
 	for tripRows.Next() {
 		var r Trip
 		err := tripRows.Scan(
-			&r.Id,
+			&r.ID,
 			&r.Name,
-			&r.UserId,
+			&r.UserID,
 			&r.RecordedTimeStamp,
 			&r.EndTimeStamp,
 			&r.Rating,
@@ -98,6 +99,7 @@ func getAllTrips(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(tripsJSON))
 }
 
+// getAllTripsForUser - get all trips for a given user
 func getAllTripsForUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -114,9 +116,9 @@ func getAllTripsForUser(w http.ResponseWriter, r *http.Request) {
 
 	for tripRows.Next() {
 		var r Trip
-		err := tripRows.Scan(&r.Id,
+		err := tripRows.Scan(&r.ID,
 			&r.Name,
-			&r.UserId,
+			&r.UserID,
 			&r.RecordedTimeStamp,
 			&r.EndTimeStamp,
 			&r.Rating,
@@ -141,6 +143,7 @@ func getAllTripsForUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(tripsJSON))
 }
 
+// deleteTrip - deletes a single trip and its associated trip points for a user
 func deleteTrip(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -154,7 +157,7 @@ func deleteTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(fmt.Sprintln("Deleted trip points for Trip '%s'", params["id"]))
+	log.Println(fmt.Sprintln(`Deleted trip points for Trip '%s'`, params["id"]))
 
 	result, err = ExecuteNonQuery(deleteTripsQuery)
 
@@ -170,27 +173,31 @@ func deleteTrip(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(serializedResult))
 }
 
+// updateTrip - update a trip
 func updateTrip(w http.ResponseWriter, r *http.Request) {
-	tripID := r.FormValue("id")
+	params := mux.Vars(r)
+
+	tripID := params["tripID"]
+
+	var trip Trip
+
 	body, err := ioutil.ReadAll(r.Body)
 
 	defer r.Body.Close()
 
 	if err != nil {
-		fmt.Fprintf(w, SerializeError(err, "Error while reading request body"))
+		fmt.Fprintf(w, SerializeError(err, "Update Trip - Error reading trip request body"))
 		return
 	}
-
-	var trip Trip
 
 	err = json.Unmarshal(body, &trip)
 
 	if err != nil {
-		fmt.Fprintf(w, SerializeError(err, "Error while decoding json"))
+		fmt.Fprintf(w, SerializeError(err, "Update Trip - Error while decoding trip json"))
 		return
 	}
 
-	updateQuery := fmt.Sprintf("UPDATE Trips SET Name = '%s', UserId = '%s', RecordedTimeStamp = '%s', EndTimeStamp = '%s', Rating = %d, IsComplete = '%s', HasSimulatedOBDData = '%s', AverageSpeed = %f, FuelUsed = %s, HardStops = %s, HardAccelerations = %s, MainPhotoUrl = '%s', Distance = %f, UpdatedAt = GETDATE() WHERE Id = '%s'", trip.Name, trip.UserId, trip.RecordedTimeStamp, trip.EndTimeStamp, trip.Rating, strconv.FormatBool(trip.IsComplete), strconv.FormatBool(trip.HasSimulatedOBDData), trip.AverageSpeed, trip.FuelUsed, trip.HardStops, trip.HardAccelerations, trip.Distance, tripID)
+	updateQuery := UpdateTripQuery(trip, tripID)
 
 	result, err := ExecuteNonQuery(updateQuery)
 
@@ -202,8 +209,10 @@ func updateTrip(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(result))
 }
 
+// createTrip - create a trip for a user.  This method does not create the associated trip points, only the trip.
 func createTrip(w http.ResponseWriter, r *http.Request) {
-	userId := r.FormValue("userId")
+	params := mux.Vars(r)
+	userID := params["userId"]
 
 	body, err := ioutil.ReadAll(r.Body)
 
@@ -216,9 +225,9 @@ func createTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	trip.UserId = userId
+	trip.UserID = userID
 
-	insertQuery := fmt.Sprintf("DECLARE @tempReturn TABLE (TripId NVARCHAR(128)); INSERT INTO Trips (Name, UserId, RecordedTimeStamp, EndTimeStamp, Rating, IsComplete, HasSimulatedOBDData, AverageSpeed, FuelUsed, HardStops, HardAccelerations, Distance, Deleted) OUTPUT Inserted.ID INTO @tempReturn VALUES ('%s', '%s', '%s', '%s', %d, '%s', '%s', %f, '%s', '%s', '%s', '%s', %f, 'false'); SELECT TripId FROM @tempReturn", trip.Name, trip.UserId, trip.RecordedTimeStamp, trip.EndTimeStamp, trip.Rating, strconv.FormatBool(trip.IsComplete), strconv.FormatBool(trip.HasSimulatedOBDData), trip.AverageSpeed, trip.FuelUsed, trip.HardStops, trip.HardAccelerations, trip.Distance)
+	insertQuery := createTripQuery(trip)
 
 	var newTrip NewTrip
 

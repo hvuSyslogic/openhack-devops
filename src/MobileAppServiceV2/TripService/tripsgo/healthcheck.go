@@ -1,5 +1,6 @@
 package tripsgo
 
+// Healthcheck - Structure for healthcheck response body
 type Healthcheck struct {
 
 	//

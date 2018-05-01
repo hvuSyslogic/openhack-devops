@@ -26,7 +26,7 @@ func getTripPoints(w http.ResponseWriter, r *http.Request) {
 
 	for statement.Next() {
 		var r TripPoint
-		err := statement.Scan(&r.Id, &r.TripId, &r.Latitude, &r.Longitude, &r.Speed, &r.RecordedTimeStamp, &r.Sequence, &r.RPM, &r.ShortTermFuelBank, &r.LongTermFuelBank, &r.ThrottlePosition, &r.RelativeThrottlePosition, &r.Runtime, &r.DistanceWithMalfunctionLight, &r.EngineLoad, &r.EngineFuelRate, &r.VIN)
+		err := statement.Scan(&r.ID, &r.TripID, &r.Latitude, &r.Longitude, &r.Speed, &r.RecordedTimeStamp, &r.Sequence, &r.RPM, &r.ShortTermFuelBank, &r.LongTermFuelBank, &r.ThrottlePosition, &r.RelativeThrottlePosition, &r.Runtime, &r.DistanceWithMalfunctionLight, &r.EngineLoad, &r.EngineFuelRate, &r.VIN)
 
 		if err != nil {
 			fmt.Fprintf(w, SerializeError(err, "Error scanning Trip Points"))
@@ -44,9 +44,9 @@ func getTripPoints(w http.ResponseWriter, r *http.Request) {
 func getTripPointByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	tripPointId := params["id"]
+	tripPointID := params["id"]
 
-	query := "SELECT [Id], [TripId], [Latitude], [Longitude], [Speed], [RecordedTimeStamp], [Sequence], [RPM], [ShortTermFuelBank], [LongTermFuelBank], [ThrottlePosition], [RelativeThrottlePosition], [Runtime], [DistanceWithMalfunctionLight], [EngineLoad], [EngineFuelRate], [VIN] FROM TripPoints WHERE Id = '" + tripPointId + "' AND Deleted = 0"
+	query := "SELECT [Id], [TripId], [Latitude], [Longitude], [Speed], [RecordedTimeStamp], [Sequence], [RPM], [ShortTermFuelBank], [LongTermFuelBank], [ThrottlePosition], [RelativeThrottlePosition], [Runtime], [DistanceWithMalfunctionLight], [EngineLoad], [EngineFuelRate], [VIN] FROM TripPoints WHERE Id = '" + tripPointID + "' AND Deleted = 0"
 
 	row, err := FirstOrDefault(query)
 
@@ -57,7 +57,7 @@ func getTripPointByID(w http.ResponseWriter, r *http.Request) {
 
 	var tripPoint TripPoint
 
-	err = row.Scan(&tripPoint.Id, &tripPoint.TripId, &tripPoint.Latitude, &tripPoint.Longitude, &tripPoint.Speed, &tripPoint.RecordedTimeStamp, &tripPoint.Sequence, &tripPoint.RPM, &tripPoint.ShortTermFuelBank, &tripPoint.LongTermFuelBank, &tripPoint.ThrottlePosition, &tripPoint.RelativeThrottlePosition, &tripPoint.Runtime, &tripPoint.DistanceWithMalfunctionLight, &tripPoint.EngineLoad, &tripPoint.EngineFuelRate, &tripPoint.VIN)
+	err = row.Scan(&tripPoint.ID, &tripPoint.TripID, &tripPoint.Latitude, &tripPoint.Longitude, &tripPoint.Speed, &tripPoint.RecordedTimeStamp, &tripPoint.Sequence, &tripPoint.RPM, &tripPoint.ShortTermFuelBank, &tripPoint.LongTermFuelBank, &tripPoint.ThrottlePosition, &tripPoint.RelativeThrottlePosition, &tripPoint.Runtime, &tripPoint.DistanceWithMalfunctionLight, &tripPoint.EngineLoad, &tripPoint.EngineFuelRate, &tripPoint.VIN)
 
 	if err != nil {
 		fmt.Fprintf(w, SerializeError(err, "Failed to scan a trip point"))
@@ -83,10 +83,10 @@ func createTripPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tripPoint.TripId = tripId
+	tripPoint.TripID = tripId
 
 	insertQuery := fmt.Sprintf("DECLARE @tempReturn TABLE (TripPointId NVARCHAR(128)); INSERT INTO TripPoints ([TripId], [Latitude], [Longitude], [Speed], [RecordedTimeStamp], [Sequence], [RPM], [ShortTermFuelBank], [LongTermFuelBank], [ThrottlePosition], [RelativeThrottlePosition], [Runtime], [DistanceWithMalfunctionLight], [EngineLoad], [EngineFuelRate], [MassFlowRate], [HasOBDData], [HasSimulatedOBDData], [VIN], [Deleted]) OUTPUT Inserted.ID INTO @tempReturn VALUES ('%s', '%s', '%s', '%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', 'false'); SELECT TripPointId FROM @tempReturn",
-		tripPoint.TripId,
+		tripPoint.TripID,
 		tripPoint.Latitude,
 		tripPoint.Longitude,
 		tripPoint.Speed,
@@ -152,8 +152,8 @@ func updateTripPoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updateQuery := fmt.Sprintf("UPDATE [TripPoints] SET [TripId] = '%s',[Latitude] = '%s',[Longitude] = '%s',[Speed] = '%s',[RecordedTimeStamp] = '%s',[Sequence] = %d,[RPM] = '%s',[ShortTermFuelBank] = '%s',[LongTermFuelBank] = '%s',[ThrottlePosition] = '%s',[RelativeThrottlePosition] = '%s',[Runtime] = '%s',[DistanceWithMalfunctionLight] = '%s',[EngineLoad] = '%s',[MassFlowRate] = '%s',[EngineFuelRate] = '%s',[HasOBDData] = '%s',[HasSimulatedOBDData] = '%s',[VIN] = '%s' WHERE Id = '%s'",
-		tripPoint.TripId,
-		tripPoint.TripId,
+		tripPoint.TripID,
+		tripPoint.TripID,
 		tripPoint.Latitude,
 		tripPoint.Longitude,
 		tripPoint.Speed,

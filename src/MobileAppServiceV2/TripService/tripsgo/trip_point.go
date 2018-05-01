@@ -4,13 +4,14 @@ import (
 	"time"
 )
 
+// TripPoint - Represents a single point record in a trip
 type TripPoint struct {
 
 	// Trip Point ID
-	Id string `json:"Id,omitempty"`
+	ID string `json:"Id,omitempty"`
 
 	// Trip ID
-	TripId string `json:"TripId,omitempty"`
+	TripID string `json:"TripId,omitempty"`
 
 	Latitude float32 `json:"Latitude,omitempty"`
 

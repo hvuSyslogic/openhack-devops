@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Logger - basic console logger that writes request info to stdout
 func Logger(inner http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
