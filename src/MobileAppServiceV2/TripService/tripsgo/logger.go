@@ -3,6 +3,7 @@ package tripsgo
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -21,4 +22,12 @@ func Logger(inner http.Handler, name string) http.Handler {
 			time.Since(start),
 		)
 	})
+}
+
+func LogToConsole(message string) {
+	var debug, present = os.LookupEnv("DEBUG_LOGGING")
+
+	if present && debug == "true" {
+		log.Printf(message)
+	}
 }

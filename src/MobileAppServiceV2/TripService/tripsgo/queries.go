@@ -20,7 +20,9 @@ func SelectTripByIDQuery(tripID string) string {
 		FuelUsed,
 		HardStops,
 		HardAccelerations,
-		Distance
+		Distance,
+		CreatedAt,
+		UpdatedAt
 		FROM Trips
 		WHERE Id = '` + tripID + `'
 		AND Deleted = 0`
@@ -41,7 +43,9 @@ func SelectAllTripsQuery() string {
 	FuelUsed,
 	HardStops,
 	HardAccelerations,
-	Distance
+	Distance,
+	CreatedAt,
+	UpdatedAt
 	FROM Trips
 	WHERE Deleted = 0`
 }
@@ -62,8 +66,10 @@ func SelectAllTripsForUserQuery(userID string) string {
 	HardStops,
 	HardAccelerations,
 	Distance
+	CreatedAt,
+	UpdatedAt
 	FROM Trips
-	WHERE UserId LIKE '%` + userID + `'
+	WHERE UserId ='` + userID + `'
 	AND Deleted = 0`
 }
 
@@ -78,7 +84,7 @@ func DeleteTripQuery(tripID string) string {
 }
 
 // UpdateTripQuery - REQUIRED trip object and tripID
-func UpdateTripQuery(trip Trip, tripID string) string {
+func UpdateTripQuery(trip Trip) string {
 	var query = `UPDATE Trips SET
 	Name = '%s',
 	UserId = '%s',
@@ -87,16 +93,15 @@ func UpdateTripQuery(trip Trip, tripID string) string {
 	Rating = %d,
 	IsComplete = '%s',
 	HasSimulatedOBDData = '%s',
-	AverageSpeed = %f,
-	FuelUsed = %s,
-	HardStops = %s,
-	HardAccelerations = %s,
-	MainPhotoUrl = '%s',
-	Distance = %f,
+	AverageSpeed = %g,
+	FuelUsed = %g,
+	HardStops = %d,
+	HardAccelerations = %d,
+	Distance = %g,
 	UpdatedAt = GETDATE()
 	WHERE Id = '%s'`
 
-	return fmt.Sprintf(
+	var formattedQuery = fmt.Sprintf(
 		query,
 		trip.Name,
 		trip.UserID,
@@ -109,8 +114,12 @@ func UpdateTripQuery(trip Trip, tripID string) string {
 		trip.FuelUsed,
 		trip.HardStops,
 		trip.HardAccelerations,
-		trip.Distance, tripID)
+		trip.Distance,
+		trip.ID)
 
+	LogToConsole("updateTripQuery: " + formattedQuery)
+
+	return formattedQuery
 }
 
 func createTripQuery(trip Trip) string {
@@ -129,25 +138,28 @@ func createTripQuery(trip Trip) string {
 			HardStops,
 			HardAccelerations,
 			Distance,
+			UpdatedAt,
 			Deleted)
 			OUTPUT Inserted.ID
 			INTO @tempReturn
-			VALUES ('%s',
+			VALUES (
+				'%s',
 				'%s',
 				'%s',
 				'%s',
 				%d,
 				'%s',
 				'%s',
-				%f,
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				%f,
+				%g,
+				%g,
+				%d,
+				%d,
+				%g,
+				GETDATE(),
 				'false');
 			SELECT TripId FROM @tempReturn`
-	return fmt.Sprintf(
+
+	var formattedQuery = fmt.Sprintf(
 		query,
 		trip.Name,
 		trip.UserID,
@@ -161,4 +173,8 @@ func createTripQuery(trip Trip) string {
 		trip.HardStops,
 		trip.HardAccelerations,
 		trip.Distance)
+
+	LogToConsole("createTripQuery: " + formattedQuery)
+
+	return formattedQuery
 }

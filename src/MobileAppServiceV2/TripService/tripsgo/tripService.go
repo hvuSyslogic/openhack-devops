@@ -18,7 +18,7 @@ func getTripByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	//Build Query
-	var query = SelectTripByIDQuery(params["id"])
+	var query = SelectTripByIDQuery(params["tripID"])
 
 	//Execute Query
 	row, err := FirstOrDefault(query)
@@ -30,7 +30,7 @@ func getTripByID(w http.ResponseWriter, r *http.Request) {
 
 	var trip Trip
 
-	err = row.Scan(
+	errScan := row.Scan(
 		&trip.ID,
 		&trip.Name,
 		&trip.UserID,
@@ -43,10 +43,13 @@ func getTripByID(w http.ResponseWriter, r *http.Request) {
 		&trip.FuelUsed,
 		&trip.HardStops,
 		&trip.HardAccelerations,
-		&trip.Distance)
+		&trip.Distance,
+		&trip.Created,
+		&trip.UpdatedAt)
 
-	if err != nil {
-		fmt.Fprintf(w, SerializeError(err, "Failed to scan a trip"))
+	if errScan != nil {
+		w.WriteHeader(404)
+		fmt.Fprintf(w, fmt.Sprintf("No trip with ID '%s' found", params["tripID"]))
 		return
 	}
 
@@ -84,7 +87,9 @@ func getAllTrips(w http.ResponseWriter, r *http.Request) {
 			&r.FuelUsed,
 			&r.HardStops,
 			&r.HardAccelerations,
-			&r.Distance)
+			&r.Distance,
+			&r.Created,
+			&r.UpdatedAt)
 
 		if err != nil {
 			fmt.Fprintf(w, SerializeError(err, "GetAllTrips - Error scanning Trips"))
@@ -103,7 +108,7 @@ func getAllTrips(w http.ResponseWriter, r *http.Request) {
 func getAllTripsForUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	var query = SelectAllTripsForUserQuery(params["id"])
+	var query = SelectAllTripsForUserQuery(params["userID"])
 
 	tripRows, err := ExecuteQuery(query)
 
@@ -128,7 +133,9 @@ func getAllTripsForUser(w http.ResponseWriter, r *http.Request) {
 			&r.FuelUsed,
 			&r.HardStops,
 			&r.HardAccelerations,
-			&r.Distance)
+			&r.Distance,
+			&r.Created,
+			&r.UpdatedAt)
 
 		if err != nil {
 			fmt.Fprintf(w, SerializeError(err, "getAllTripsForUser - Error scanning Trips"))
@@ -147,8 +154,8 @@ func getAllTripsForUser(w http.ResponseWriter, r *http.Request) {
 func deleteTrip(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	var deleteTripPointsQuery = DeleteTripPointsForTripQuery(params["id"])
-	var deleteTripsQuery = DeleteTripQuery(params["id"])
+	var deleteTripPointsQuery = DeleteTripPointsForTripQuery(params["tripID"])
+	var deleteTripsQuery = DeleteTripQuery(params["tripID"])
 
 	result, err := ExecuteNonQuery(deleteTripPointsQuery)
 
@@ -157,7 +164,7 @@ func deleteTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(fmt.Sprintln(`Deleted trip points for Trip '%s'`, params["id"]))
+	log.Println(fmt.Sprintln(`Deleted trip points for Trip '%s'`, params["tripID"]))
 
 	result, err = ExecuteNonQuery(deleteTripsQuery)
 
@@ -166,7 +173,7 @@ func deleteTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(fmt.Sprintln("Deleted trip '%s'", params["id"]))
+	log.Println(fmt.Sprintln("Deleted trip '%s'", params["tripID"]))
 
 	serializedResult, _ := json.Marshal(result)
 
@@ -197,22 +204,25 @@ func updateTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updateQuery := UpdateTripQuery(trip, tripID)
+	trip.ID = tripID
+
+	updateQuery := UpdateTripQuery(trip)
 
 	result, err := ExecuteNonQuery(updateQuery)
 
 	if err != nil {
-		fmt.Fprintf(w, SerializeError(err, "Error while patching trip on the database"))
+		fmt.Fprintf(w, SerializeError(err, "Error while patching trip on the database."+string(result)))
 		return
 	}
 
-	fmt.Fprintf(w, string(result))
+	serializedTrip, _ := json.Marshal(trip)
+
+	fmt.Fprintf(w, string(serializedTrip))
 }
 
 // createTrip - create a trip for a user.  This method does not create the associated trip points, only the trip.
 func createTrip(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	userID := params["userId"]
+	//params := mux.Vars(r)
 
 	body, err := ioutil.ReadAll(r.Body)
 
@@ -225,8 +235,6 @@ func createTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	trip.UserID = userID
-
 	insertQuery := createTripQuery(trip)
 
 	var newTrip NewTrip
@@ -234,7 +242,7 @@ func createTrip(w http.ResponseWriter, r *http.Request) {
 	result, err := ExecuteQuery(insertQuery)
 
 	if err != nil {
-		fmt.Fprintf(w, SerializeError(err, "Error while inserting trip onto database"))
+		fmt.Fprintf(w, SerializeError(err, "Error while inserting trip into database"))
 		return
 	}
 
@@ -246,7 +254,9 @@ func createTrip(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	serializedTrip, _ := json.Marshal(newTrip)
+	trip.ID = newTrip.Id
+
+	serializedTrip, _ := json.Marshal(trip)
 
 	fmt.Fprintf(w, string(serializedTrip))
 }

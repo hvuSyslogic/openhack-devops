@@ -116,7 +116,7 @@ var routes = Routes{
 	Route{
 		"HealthcheckGet",
 		strings.ToUpper("Get"),
-		"/api/healthcheck",
+		"/api/healthcheck/trips",
 		healthcheckGet,
 	},
 
