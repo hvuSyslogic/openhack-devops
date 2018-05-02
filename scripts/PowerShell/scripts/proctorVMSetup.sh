@@ -20,15 +20,23 @@ sudo yum install -y epel-release
 sudo yum install -y jq
 
 echo "############### Installing Docker ###############"
+echo "sudo yum check-update"
 sudo yum check-update
+echo "sudo yum install -y yum-utils device-mapper-persistent-data lvm2"
 sudo yum install -y yum-utils \
   device-mapper-persistent-data \
   lvm2
+echo "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
 sudo yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
+echo "sudo yum install -y docker-ce"
 sudo yum install -y docker-ce
+echo "sudo systemctl start docker"
 sudo systemctl start docker
+echo "sudo systemctl enable docker"
 sudo systemctl enable docker
+echo "sudo groupadd docker"
 sudo groupadd docker
+echo "sudo usermod -aG docker $USER"
 sudo usermod -aG docker $USER
