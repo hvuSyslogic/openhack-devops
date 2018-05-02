@@ -13,9 +13,6 @@
       },
       "dnsNameForPublicIP": {
         "value": "DNS NAME FOR PUBLIC IP"
-      },
-      "ubuntuOSVersion": {
-        "value": "16.04.0-LTS"
       }
     }
   }
