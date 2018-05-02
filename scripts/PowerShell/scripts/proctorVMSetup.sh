@@ -12,8 +12,8 @@ echo "############### Installing Dotnet SDK v2.1.4 ###############"
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sudo sh -c 'echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl= https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo'
 sudo yum update
-sudo yum install libunwind libicu -y
-sudo yum install dotnet-sdk-2.1.4 -y
+sudo yum install -y libunwind libicu
+sudo yum install -y dotnet-sdk-2.1.4
 
 echo "############### Installing Jq v1.5 ###############"
 sudo yum install -y epel-release
@@ -28,7 +28,7 @@ sudo yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
 sudo yum install -y docker-ce
-systemctl start docker
-systemctl enable docker
+sudo systemctl start docker
+sudo systemctl enable docker
 sudo groupadd docker
-usermod -aG docker $USER
+sudo usermod -aG docker $USER
