@@ -29,5 +29,6 @@ yum-config-manager \
     https://download.docker.com/linux/centos/docker-ce.repo
 yum install -y docker-ce
 systemctl start docker
+systemctl enable docker
 groupadd docker
 usermod -aG docker $USER
