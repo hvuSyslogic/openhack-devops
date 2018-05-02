@@ -20,8 +20,6 @@ sudo yum install -y epel-release
 sudo yum install -y jq
 
 echo "############### Installing Docker ###############"
-echo "sudo yum check-update"
-sudo yum check-update
 echo "sudo yum install -y yum-utils device-mapper-persistent-data lvm2"
 sudo yum install -y yum-utils \
   device-mapper-persistent-data \
