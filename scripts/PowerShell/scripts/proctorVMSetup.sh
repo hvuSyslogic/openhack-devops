@@ -1,31 +1,27 @@
-echo "######################### VERSION 1.1 ########################"
-echo "######################### AZURE CLI ########################"
-AZ_REPO=$(lsb_release -cs)
-echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
-     sudo tee /etc/apt/sources.list.d/azure-cli.list
-apt-key adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893
-apt-get install apt-transport-https -y
-apt-get update 
-sudo apt-get install azure-cli -y
+echo "############### Installing Azure CLI v2.0.31 ###############"
+rpm --import https://packages.microsoft.com/keys/microsoft.asc
+echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo
+yum install azure-cli-2.0.31-1.el7.x86_64 -y
 
-echo "##################### DOTNET CORE ########################"
-curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+echo "############### Installing Helm v2.9.0 ###############"
+curl -O https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
+tar -zxvf helm-v2.9.0-linux-amd64.tar.gz
+mv linux-amd64/helm /usr/local/bin/helm
 
-sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
-sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
+echo "############### Installing Dotnet SDK v2.1.4 ###############"
+rpm --import https://packages.microsoft.com/keys/microsoft.asc
+echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl= https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo
+yum update
+yum install libunwind libicu -y
+yum install dotnet-sdk-2.1.4 -y
 
-apt-get update
+echo "############### Installing Jq v1.5 ###############"
+yum install -y epel-release
+yum install -y jq
 
-apt-get install dotnet-sdk-2.1.4 -y
-
-echo "####################### HELM ################################"
-curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
-chmod 700 get_helm.sh
-./get_helm.sh
-
-echo "############################## JQ ############################"
-apt-get install jq -y
-
-echo "############################## PULL TEAM-CLI FROM GITHUB ##############################"
-git clone https://github.com/Azure-Samples/openhack-team-cli.git
+echo "############### Installing Docker ###############"
+yum check-update
+curl -fsSL https://get.docker.com/ | sh
+systemctl start docker
+systemctl enable docker
+usermod -aG docker $(whoami)
