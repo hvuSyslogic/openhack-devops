@@ -43,4 +43,4 @@ echo "sudo usermod -aG docker $USER"
 sudo usermod -aG docker $USER
 
 echo "############### Pulling Openhack-tools from Github "###############
-git clone https://github.com/Azure-Samples/openhack-devops-tools.git
+git clone https://github.com/Azure-Samples/openhack-devops-tools.git /home/azureuser
