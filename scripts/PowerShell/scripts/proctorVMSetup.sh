@@ -1,4 +1,4 @@
-echo "############### Removing requiretty ###############""
+echo "############### Removing requiretty ###############"
 sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers
 
 echo "############### Installing Azure CLI v2.0.31 ###############"
