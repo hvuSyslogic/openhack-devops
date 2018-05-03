@@ -28,4 +28,4 @@ echo "############### Installing Git ###############"
 sudo apt-get install -y git
 
 echo "############### Pulling Openhack-tools from Github "###############
-git clone https://github.com/Azure-Samples/openhack-devops-tools.git /home/azureuser
+sudo git clone https://github.com/Azure-Samples/openhack-devops-tools.git /home/azureuser/openhack
