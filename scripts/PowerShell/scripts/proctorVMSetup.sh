@@ -21,8 +21,8 @@ sudo apt-get install -y apt-transport-https
 sudo apt-get update
 sudo apt-get install -y dotnet-sdk-2.1.4
 
-echo "############### Installing Jq v1.5 ###############"
-sudo apt-get install -y jq=1.5+dfsg-1
+echo "############### Installing Jq ###############"
+sudo apt-get install -y jq
 
 echo "############### Installing Git ###############"
 sudo apt-get install -y git
