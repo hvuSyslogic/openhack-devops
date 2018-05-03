@@ -1,10 +1,11 @@
-echo "############### Removing requiretty ###############"
-sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers
-
 echo "############### Installing Azure CLI v2.0.31 ###############"
-sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-sudo sh -c 'echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo'
-sudo yum install -y azure-cli-2.0.31-1.el7.x86_64
+AZ_REPO=$(lsb_release -cs)
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
+     sudo tee /etc/apt/sources.list.d/azure-cli.list
+sudo apt-key adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893
+sudo apt-get install -y apt-transport-https
+sudo apt-get update
+sudo apt-get install -y azure-cli=2.0.31-1~xenial
 
 echo "############### Installing Helm v2.9.0 ###############"
 sudo curl -O https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
@@ -12,38 +13,19 @@ sudo tar -zxvf helm-v2.9.0-linux-amd64.tar.gz
 sudo mv linux-amd64/helm /usr/local/bin/helm
 
 echo "############### Installing Dotnet SDK v2.1.4 ###############"
-sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-sudo sh -c 'echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl= https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo'
-sudo yum update -y
-sudo yum install -y libunwind libicu
-sudo yum install -y dotnet-sdk-2.1.4
+curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
+
+sudo apt-get install -y apt-transport-https
+sudo apt-get update
+sudo apt-get install -y dotnet-sdk-2.1.4
 
 echo "############### Installing Jq v1.5 ###############"
-sudo yum install -y epel-release
-sudo yum install -y jq
-
-echo "############### Installing Docker ###############"
-echo "sudo yum install -y yum-utils device-mapper-persistent-data lvm2"
-sudo yum install -y yum-utils \
-  device-mapper-persistent-data \
-  lvm2
-echo "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
-sudo yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-echo "sudo yum install -y docker-ce"
-sudo yum install -y docker-ce
-echo "sudo systemctl start docker"
-sudo systemctl start docker
-echo "sudo systemctl enable docker"
-sudo systemctl enable docker
-echo "sudo groupadd docker"
-sudo groupadd docker
-echo "sudo usermod -aG docker $USER"
-sudo usermod -aG docker $USER
+sudo apt-get install -y jq=1.5+dfsg-1
 
 echo "############### Installing Git ###############"
-sudo yum install -y git
+sudo apt-get install -y git
 
 echo "############### Pulling Openhack-tools from Github "###############
 git clone https://github.com/Azure-Samples/openhack-devops-tools.git /home/azureuser
