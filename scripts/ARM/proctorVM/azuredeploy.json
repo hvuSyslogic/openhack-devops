@@ -229,7 +229,7 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [
-            "hhttps://raw.githubusercontent.com/Azure-Samples/openhack-devops/master/scripts/PowerShell/scripts/proctorVMSetup.sh"
+            "https://raw.githubusercontent.com/Azure-Samples/openhack-devops/master/scripts/PowerShell/scripts/proctorVMSetup.sh"
           ],
           "commandToExecute": "sh proctorVMSetup.sh"
         }
