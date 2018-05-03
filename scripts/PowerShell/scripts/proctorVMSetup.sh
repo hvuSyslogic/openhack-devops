@@ -1,31 +1,31 @@
-echo "######################### VERSION 1.1 ########################"
-echo "######################### AZURE CLI ########################"
+echo "############### Installing Azure CLI v2.0.31 ###############"
 AZ_REPO=$(lsb_release -cs)
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
      sudo tee /etc/apt/sources.list.d/azure-cli.list
-apt-key adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893
-apt-get install apt-transport-https -y
-apt-get update 
-sudo apt-get install azure-cli -y
+sudo apt-key adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893
+sudo apt-get install -y apt-transport-https
+sudo apt-get update
+sudo apt-get install -y azure-cli=2.0.31-1~xenial
 
-echo "##################### DOTNET CORE ########################"
+echo "############### Installing Helm v2.9.0 ###############"
+sudo curl -O https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
+sudo tar -zxvf helm-v2.9.0-linux-amd64.tar.gz
+sudo mv linux-amd64/helm /usr/local/bin/helm
+
+echo "############### Installing Dotnet SDK v2.1.4 ###############"
 curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
-
-sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
+sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
 
-apt-get update
+sudo apt-get install -y apt-transport-https
+sudo apt-get update
+sudo apt-get install -y dotnet-sdk-2.1.4
 
-apt-get install dotnet-sdk-2.1.4 -y
+echo "############### Installing Jq ###############"
+sudo apt-get install -y jq
 
-echo "####################### HELM ################################"
-curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
-chmod 700 get_helm.sh
-./get_helm.sh
+echo "############### Installing Git ###############"
+sudo apt-get install -y git
 
-echo "############################## JQ ############################"
-apt-get install jq -y
-
-echo "############################## PULL TEAM-CLI FROM GITHUB ##############################"
-git clone https://github.com/Azure-Samples/openhack-team-cli.git
+echo "############### Pulling Openhack-tools from Github "###############
+sudo git clone https://github.com/Azure-Samples/openhack-devops-tools.git /home/azureuser/openhack-devops-tools
