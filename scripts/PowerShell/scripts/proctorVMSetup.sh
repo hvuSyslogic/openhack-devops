@@ -14,7 +14,7 @@ sudo mv linux-amd64/helm /usr/local/bin/helm
 echo "############### Installing Dotnet SDK v2.1.4 ###############"
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sudo sh -c 'echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl= https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo'
-#sudo yum update -y
+sudo yum update -y
 sudo yum install -y libunwind libicu
 sudo yum install -y dotnet-sdk-2.1.4
 
@@ -41,6 +41,9 @@ echo "sudo groupadd docker"
 sudo groupadd docker
 echo "sudo usermod -aG docker $USER"
 sudo usermod -aG docker $USER
+
+echo "############### Installing Git ###############"
+sudo yum install -y git
 
 echo "############### Pulling Openhack-tools from Github "###############
 git clone https://github.com/Azure-Samples/openhack-devops-tools.git /home/azureuser
