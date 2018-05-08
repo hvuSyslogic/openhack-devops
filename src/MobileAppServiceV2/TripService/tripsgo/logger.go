@@ -24,6 +24,7 @@ func Logger(inner http.Handler, name string) http.Handler {
 	})
 }
 
+// LogToConsole - log a message to console if debug is enabled.
 func LogToConsole(message string) {
 	var debug, present = os.LookupEnv("DEBUG_LOGGING")
 
