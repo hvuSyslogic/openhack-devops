@@ -1,11 +1,19 @@
 package tripsgo
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
+	"github.com/codemodus/swagui"
 	"github.com/gorilla/mux"
+)
+
+var (
+	wsp  = flag.String("wsp", getEnv("WEB_PORT", "8080"), "web server port")
+	wsbu = flag.String("wsbu", getEnv("WEB_SERVER_BASE_URI", "changeme"), "base portion of server uri")
 )
 
 // Route - object representing a route handler
@@ -21,19 +29,13 @@ type Routes []Route
 
 // NewRouter - Constructor
 func NewRouter() *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
+	router := mux.NewRouter() //.StrictSlash(true)
 	for _, route := range routes {
-		var handler http.Handler
-		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name)
-
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(handler)
+		CreateHandler(router, route)
 	}
 
+	// add docs route
+	CreateDocsHandler(router, docsRoute)
 	return router
 }
 
@@ -42,12 +44,79 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Trips Service")
 }
 
+// CreateHandler - Create router handler
+func CreateHandler(router *mux.Router, route Route) {
+	var handler http.Handler
+	handler = route.HandlerFunc
+	handler = Logger(handler, route.Name)
+
+	router.
+		Methods(route.Method).
+		Path(route.Pattern).
+		Name(route.Name).
+		Handler(handler)
+}
+
+// CreateDocsHandler - Create route handler for docs using SwagUI
+func CreateDocsHandler(router *mux.Router, route Route) {
+	// var handler http.Handler
+	var options swagui.Options
+	options.PathPrefix = route.Pattern
+	options.DefaultURLParam = fmt.Sprintf("%s%s%s%s",
+		*wsbu,
+		":",
+		*wsp,
+		"/api/json/swagger.json")
+
+	ui, err := swagui.New(&options)
+	if err != nil {
+
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	// handler = ui.Handler()
+	// handler = Logger(handler, route.Name)
+
+	router.
+		Methods(route.Method).
+		Path(ui.PathPrefix()).
+		Name(route.Name).
+		Handler(ui.Handler())
+
+	router.
+		Methods(route.Method).
+		Path("/api/docs/trips/{dir}/{fileName}").
+		Name("*").
+		Handler(ui.Handler())
+
+	router.
+		Methods(route.Method).
+		Path("/api/docs/trips/{fileName}").
+		Name("Swagger UI JS").
+		Handler(ui.Handler())
+}
+
+var docsRoute = Route{
+	"swagger-ui",
+	strings.ToUpper("Get"),
+	"/api/docs/trips/",
+	nil,
+}
+
 var routes = Routes{
 	Route{
 		"Index",
 		"GET",
 		"/api/",
 		Index,
+	},
+
+	Route{
+		"swagger-json",
+		strings.ToUpper("Get"),
+		"/api/json/swagger.json",
+		swaggerDocsJSON,
 	},
 
 	Route{

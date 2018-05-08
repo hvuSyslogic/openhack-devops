@@ -70,7 +70,7 @@ func getTripPointByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func createTripPoint(w http.ResponseWriter, r *http.Request) {
-	tripId := r.FormValue("tripId")
+	tripID := r.FormValue("tripId")
 
 	body, err := ioutil.ReadAll(r.Body)
 
@@ -83,7 +83,7 @@ func createTripPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tripPoint.TripID = tripId
+	tripPoint.TripID = tripID
 
 	insertQuery := fmt.Sprintf("DECLARE @tempReturn TABLE (TripPointId NVARCHAR(128)); INSERT INTO TripPoints ([TripId], [Latitude], [Longitude], [Speed], [RecordedTimeStamp], [Sequence], [RPM], [ShortTermFuelBank], [LongTermFuelBank], [ThrottlePosition], [RelativeThrottlePosition], [Runtime], [DistanceWithMalfunctionLight], [EngineLoad], [EngineFuelRate], [MassFlowRate], [HasOBDData], [HasSimulatedOBDData], [VIN], [Deleted]) OUTPUT Inserted.ID INTO @tempReturn VALUES ('%s', '%s', '%s', '%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', 'false'); SELECT TripPointId FROM @tempReturn",
 		tripPoint.TripID,
@@ -131,7 +131,7 @@ func createTripPoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateTripPoint(w http.ResponseWriter, r *http.Request) {
-	tripPointId := r.FormValue("id")
+	tripPointID := r.FormValue("id")
 
 	body, err := ioutil.ReadAll(r.Body)
 
@@ -172,7 +172,7 @@ func updateTripPoint(w http.ResponseWriter, r *http.Request) {
 		strconv.FormatBool(tripPoint.HasOBDData),
 		strconv.FormatBool(tripPoint.HasSimulatedOBDData),
 		tripPoint.VIN,
-		tripPointId)
+		tripPointID)
 
 	result, err := ExecuteNonQuery(updateQuery)
 
@@ -185,9 +185,9 @@ func updateTripPoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteTripPoint(w http.ResponseWriter, r *http.Request) {
-	tripPointId := r.FormValue("id")
+	tripPointID := r.FormValue("id")
 
-	deleteTripPointQuery := fmt.Sprintf("UPDATE TripPoints SET Deleted = 1 WHERE Id = '%s'", tripPointId)
+	deleteTripPointQuery := fmt.Sprintf("UPDATE TripPoints SET Deleted = 1 WHERE Id = '%s'", tripPointID)
 
 	result, err := ExecuteNonQuery(deleteTripPointQuery)
 
@@ -202,9 +202,9 @@ func deleteTripPoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func getMaxSequence(w http.ResponseWriter, r *http.Request) {
-	tripId := r.FormValue("id")
+	tripID := r.FormValue("id")
 
-	query := fmt.Sprintf("SELECT MAX(Sequence) as MaxSequence FROM TripPoints where tripid = '%s'", tripId)
+	query := fmt.Sprintf("SELECT MAX(Sequence) as MaxSequence FROM TripPoints where tripid = '%s'", tripID)
 
 	row, err := FirstOrDefault(query)
 
@@ -228,5 +228,5 @@ func getMaxSequence(w http.ResponseWriter, r *http.Request) {
 // End of Trip Point Service Methods
 
 type newTripPoint struct {
-	Id string
+	ID string
 }

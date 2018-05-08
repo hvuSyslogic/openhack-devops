@@ -237,7 +237,7 @@ func createTrip(w http.ResponseWriter, r *http.Request) {
 
 	insertQuery := createTripQuery(trip)
 
-	var newTrip NewTrip
+	var newTripID newTrip
 
 	result, err := ExecuteQuery(insertQuery)
 
@@ -247,22 +247,22 @@ func createTrip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for result.Next() {
-		err = result.Scan(&newTrip.Id)
+		err = result.Scan(&newTripID.ID)
 
 		if err != nil {
 			fmt.Fprintf(w, SerializeError(err, "Error while retrieving last id"))
 		}
 	}
 
-	trip.ID = newTrip.Id
+	trip.ID = newTripID.ID
 
 	serializedTrip, _ := json.Marshal(trip)
 
 	fmt.Fprintf(w, string(serializedTrip))
 }
 
-type NewTrip struct {
-	Id string
+type newTrip struct {
+	ID string
 }
 
 // End of Trip Service Methods
