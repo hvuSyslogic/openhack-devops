@@ -178,3 +178,37 @@ func createTripQuery(trip Trip) string {
 
 	return formattedQuery
 }
+
+func SelectTripPointsForTripQuery(tripID string) string {
+
+	var query = `SELECT
+		[Id],
+		[TripId],
+		[Latitude],
+		[Longitude],
+		[Speed],
+		[RecordedTimeStamp],
+		[Sequence],
+		[RPM],
+		[ShortTermFuelBank],
+		[LongTermFuelBank],
+		[ThrottlePosition],
+		[RelativeThrottlePosition],
+		Runtime],
+		[DistanceWithMalfunctionLight],
+		[EngineLoad],
+		[EngineFuelRate],
+		[VIN]
+	FROM [dbo].[TripPoints]
+	WHERE
+		TripId = '%s'
+		Deleted = 0`
+
+	var formattedQuery = fmt.Sprintf(
+		query,
+		tripID)
+
+	LogToConsole("SelectTripPointsForTripQuery: " + formattedQuery)
+
+	return formattedQuery
+}

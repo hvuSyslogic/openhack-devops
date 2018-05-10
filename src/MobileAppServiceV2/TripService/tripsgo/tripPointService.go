@@ -13,7 +13,11 @@ import (
 // TripPoint Service Methods
 
 func getTripPoints(w http.ResponseWriter, r *http.Request) {
-	query := "SELECT [Id], [TripId], [Latitude], [Longitude], [Speed], [RecordedTimeStamp], [Sequence], [RPM], [ShortTermFuelBank], [LongTermFuelBank], [ThrottlePosition], [RelativeThrottlePosition], [Runtime], [DistanceWithMalfunctionLight], [EngineLoad], [EngineFuelRate], [VIN] FROM [dbo].[TripPoints] WHERE Deleted = 0"
+	params := mux.Vars(r)
+
+	var tripID = params["tripID"]
+
+	var query = SelectTripPointsForTripQuery(tripID)
 
 	statement, err := ExecuteQuery(query)
 
@@ -22,21 +26,38 @@ func getTripPoints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	got := []TripPoint{}
+	tripPointRows := []TripPoint{}
 
 	for statement.Next() {
-		var r TripPoint
-		err := statement.Scan(&r.ID, &r.TripID, &r.Latitude, &r.Longitude, &r.Speed, &r.RecordedTimeStamp, &r.Sequence, &r.RPM, &r.ShortTermFuelBank, &r.LongTermFuelBank, &r.ThrottlePosition, &r.RelativeThrottlePosition, &r.Runtime, &r.DistanceWithMalfunctionLight, &r.EngineLoad, &r.EngineFuelRate, &r.VIN)
+		var tp TripPoint
+		err := statement.Scan(
+			&tp.ID,
+			&tp.TripID,
+			&tp.Latitude,
+			&tp.Longitude,
+			&tp.Speed,
+			&tp.RecordedTimeStamp,
+			&tp.Sequence,
+			&tp.RPM,
+			&tp.ShortTermFuelBank,
+			&tp.LongTermFuelBank,
+			&tp.ThrottlePosition,
+			&tp.RelativeThrottlePosition,
+			&tp.Runtime,
+			&tp.DistanceWithMalfunctionLight,
+			&tp.EngineLoad,
+			&tp.EngineFuelRate,
+			&tp.VIN)
 
 		if err != nil {
 			fmt.Fprintf(w, SerializeError(err, "Error scanning Trip Points"))
 			return
 		}
 
-		got = append(got, r)
+		tripPointRows = append(tripPointRows, tp)
 	}
 
-	serializedReturn, _ := json.Marshal(got)
+	serializedReturn, _ := json.Marshal(tripPointRows)
 
 	fmt.Fprintf(w, string(serializedReturn))
 }
